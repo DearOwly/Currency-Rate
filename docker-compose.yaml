@@ -1,0 +1,39 @@
+version: '3.9'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: currency-rate-service-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      timeout: 30s
+      retries: 3
+    networks:
+      - currency-rate-network
+  currency-rate-service:
+    build:
+      dockerfile: Dockerfile
+    image: currency-rate-service:latest
+    container_name: currency-rate-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: user
+      SPRING_RABBITMQ_PASSWORD: password
+      QUEUE_NAME: currency-rate-queue
+      SCHEDULED_QUEUE_NAME: scheduled-currency-rate-queue
+    ports:
+      - "8080:8080"
+    networks:
+      - currency-rate-network
+
+networks:
+  currency-rate-network:
+    driver: bridge

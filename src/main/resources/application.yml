@@ -1,0 +1,15 @@
+currency-rate-service:
+  central-bank:
+    mock: false
+  binance:
+    mock: false
+
+rabbitmq:
+  queue-name: currency-rate-queue
+  scheduled:
+    queue-name: scheduled-currency-rate-queue
+    cron: "* * * * * *"
+spring:
+  rabbitmq:
+    username: user
+    password: password
